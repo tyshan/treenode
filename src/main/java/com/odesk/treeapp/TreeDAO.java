@@ -3,6 +3,7 @@ package com.odesk.treeapp;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,10 +21,12 @@ public class TreeDAO {
 		final String sql = "select id,name,description,parentid from treenode where id=?";
 		Connection connection = ConnectionUtil.getConnection();
 		TreeNode node = null;
+		PreparedStatement pstmt=null;
+		ResultSet rtst=null;
 		try {
-			PreparedStatement pstmt = connection.prepareStatement(sql);
+			pstmt = connection.prepareStatement(sql);
 			pstmt.setInt(1, id);
-			ResultSet rtst = pstmt.executeQuery();
+			rtst = pstmt.executeQuery();
 			if (rtst.next()) {
 				node = new TreeNode();
 				node.setId(rtst.getInt(1));
@@ -31,8 +34,30 @@ public class TreeDAO {
 				node.setDescription(rtst.getString(3));
 				node.setParentid(rtst.getInt(4));
 			}
+			
 		} catch (Exception e) {
 			e.printStackTrace();
+		}finally{
+			if(rtst!=null){
+				try {
+					rtst.close();
+				} catch (SQLException e) {
+					
+				}
+			}
+			if(pstmt!=null){
+				try {
+					pstmt.close();
+				} catch (SQLException e) {
+				
+				}
+			}
+			if(connection!=null){
+				try {
+					connection.close();
+				} catch (SQLException e) {
+				}
+			}
 		}
 		return node;
 	}
